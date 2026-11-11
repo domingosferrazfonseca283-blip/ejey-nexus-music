@@ -1,14 +1,17 @@
-# EJey Nexus Music — AI model training
+# EJey Nexus Music — PC training kit
 
-## Current milestone: EJey Music Transformer v0.2
+## EJey Music Transformer v0.3
 
-The first trainable component is a **conditional symbolic-music model**. It learns event sequences from MIDI and can generate new MIDI drafts conditioned on genre, mood and tempo labels represented in its training vocabulary.
+This package contains the first trainable EJey component: a conditional Transformer that learns symbolic note-event sequences from MIDI files. It generates MIDI drafts, not finished WAV/MP3 audio. It does not generate lyrics, vocals, album artwork or mastered audio; those remain separate specialist-model integrations on the roadmap.
 
-This is not yet a complete music-production AI. It does not directly generate WAV/MP3, lyrics, vocals, album artwork or mastered audio. Those require separate specialist models/services and an orchestration layer. The app's album-cover canvas remains a local procedural graphics tool until an image model is integrated.
+## Requirements
 
-## Training environment
+- Windows, Linux or macOS
+- Python 3.10 or newer
+- 8 GB RAM is a practical starting point for small experiments
+- NVIDIA GPU optional; CPU training is supported but slower
 
-Use a Windows, Linux or macOS PC. Python 3.10+ is recommended; 8 GB RAM is a practical starting point. A compatible NVIDIA GPU can accelerate training, but CPU mode is supported for small experiments.
+Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -18,65 +21,90 @@ Windows PowerShell: `.venv\\Scripts\\Activate.ps1`
 
 Linux/macOS: `source .venv/bin/activate`
 
+Install dependencies:
+
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-For NVIDIA GPU support, install the PyTorch build matching the computer's CUDA environment using the official PyTorch selector, then install the remaining requirements.
+For NVIDIA acceleration, install the PyTorch build matching the PC's CUDA version using the official PyTorch installation selector, then install the remaining requirements.
 
-## Dataset and rights
+## 1. Add and audit MIDI data
 
-Put MIDI files in `data/raw/`. Use only music you created, public-domain material, or datasets whose licenses explicitly permit machine-learning training. Keep a record of each source and its license. Do not upload private material or copyrighted recordings/MIDI without permission.
+Copy only MIDI files you created, public-domain MIDI, or datasets whose licenses explicitly permit machine-learning training into `data/raw/`. Keep the license text and source records separately.
 
-## 1. Prepare labelled MIDI sequences
+```bash
+python audit_dataset.py --input data/raw --output data/processed/dataset_audit.json --license-label "public-domain"
+```
 
-The metadata flags apply to every MIDI file in the input folder. For a mixed dataset, prepare separate labelled subsets and combine their JSONL output files afterward.
+The audit reports file hashes, duplicate files, tracks, note counts, durations and parsing errors. The license label is a user-supplied record; the script cannot verify rights.
+
+## 2. Prepare labelled sequences
+
+Each invocation applies the same labels to all MIDI files in that folder. For mixed genres or moods, use separate folders/output files, then combine the JSONL rows into one dataset.
 
 ```bash
 python prepare_dataset.py --input data/raw --output data/processed/sequences.jsonl --genre "Jazz" --mood "Reflective" --tempo "Slow" --license-label "public-domain"
 ```
 
-Allowed labels are free text, but generation must use labels represented in the training vocabulary. Use consistent spelling and capitalization.
+Use consistent spelling and capitalization. Generation conditions must exist in the training vocabulary.
 
-## 2. Train
+## 3. Train
 
 ```bash
-python train.py --data data/processed/sequences.jsonl --out runs/ejey-music-v0.2 --epochs 30
+python train.py --data data/processed/sequences.jsonl --out runs/ejey-music-v0.3 --epochs 30
 ```
+
+The trainer writes `latest.pt` every epoch, keeps the best checkpoint, writes `vocab.json` before training, and records `training_report.json`. It automatically selects CUDA when available, otherwise CPU.
 
 Useful options:
 
 - `--batch-size 8` to reduce memory use.
 - `--block-size 128` for context length.
 - `--width 192 --layers 4 --heads 4` for the starter network.
-- `--validation-ratio 0.1` to reserve independent MIDI sequences for validation.
+- `--validation-ratio 0.1` to reserve sequences for validation.
+- `--seed 42` for repeatable initialization and split.
 
-Start with a small experiment and inspect training and validation loss. A lower loss does not by itself mean better music. Keep validation files separate by composition/source where possible to reduce leakage.
+### Resume after interruption
 
-## 3. Generate a MIDI draft
-
-Use genre, mood and tempo labels that exist in the training vocabulary:
+Use the same dataset, output folder, model dimensions and seed. Increase the total target epoch count:
 
 ```bash
-python generate.py --checkpoint runs/ejey-music-v0.2/best.pt --vocab runs/ejey-music-v0.2/vocab.json --output runs/generated/ejey-draft.mid --genre "Jazz" --mood "Reflective" --tempo "Slow" --max-tokens 256
+python train.py --data data/processed/sequences.jsonl --out runs/ejey-music-v0.3 --epochs 60 --resume runs/ejey-music-v0.3/latest.pt
+```
+
+Resume checks vocabulary and model dimensions. If the dataset changes, start a new run rather than silently mixing incompatible vocabularies.
+
+## 4. Generate a MIDI draft
+
+```bash
+python generate.py --checkpoint runs/ejey-music-v0.3/best.pt --vocab runs/ejey-music-v0.3/vocab.json --output runs/generated/ejey-draft.mid --genre "Jazz" --mood "Reflective" --tempo "Slow" --max-tokens 256
 ```
 
 Optional controls: `--temperature 0.9`, `--top-k 20`, `--program 0`, `--seed 1234`.
 
-Open the MIDI in a DAW to listen, edit and arrange it. MIDI is symbolic note data; it is not a rendered audio file.
+Open the MIDI in a DAW to listen, edit and arrange it. MIDI is symbolic note data, not rendered audio.
 
-## Output and evaluation
+## Dataset quality and evaluation
 
-The training run writes `best.pt`, `latest.pt`, `vocab.json` and `training_report.json`. Evaluate held-out loss, valid note ranges, rhythmic variation, pitch distribution, repetition and musical quality by listening to multiple samples.
+- Prefer many independent, varied compositions over repeated copies.
+- Keep validation compositions separate from training sources where possible.
+- Inspect the audit report and remove corrupt files and duplicates.
+- Monitor training and validation loss; lower loss alone does not guarantee musical quality.
+- Listen to multiple generated samples and assess rhythm, pitch range, repetition, structure and musical coherence.
 
-## Model roadmap
+## Package contents and portability
 
-1. Conditional symbolic MIDI (current starter).
-2. Multi-track representation with instrument identity, tempo maps, bars and richer timing.
-3. Arrangement and composition controls, including song sections and instrumentation.
-4. Audio rendering / text-to-audio integration through a separate audio model.
-5. Separate modules for lyrics, synthetic vocals, mixing/mastering and AI album artwork.
-6. A secure orchestration API that connects specialist models to the EJey app.
+The PC ZIP contains source code, requirements and instructions. It deliberately excludes raw MIDI, processed datasets, virtual environments, secrets and model checkpoints. Copy your licensed MIDI data to `training/data/raw/` on the PC. Keep training outputs under `training/runs/` and back them up separately.
 
-Do not treat the starter Transformer as a production music model. Its quality is limited by dataset size, representation, labels and compute. Train on a PC; the phone app is the client, not the training machine.
+## Roadmap
+
+1. Conditional symbolic MIDI starter (current).
+2. Richer multi-track event representation, instrument identity, tempo maps and song sections.
+3. Composition and arrangement controls.
+4. Audio generation/rendering through a specialist audio model.
+5. Separate lyrics, synthetic vocals, mixing/mastering and image-generation models.
+6. Secure orchestration API connecting specialist models to the EJey app.
+
+This is a research starter, not a production music model. Its output quality depends on dataset rights, diversity, representation, model size and available compute.
