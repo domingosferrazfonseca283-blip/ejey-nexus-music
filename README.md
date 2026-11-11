@@ -1,40 +1,25 @@
 # EJey Nexus Music
 
-Estúdio móvel de criação musical assistida por IA.
+Estúdio móvel para criação musical assistida por IA.
 
-## Estado atual
+## Aplicativo
+Interface responsiva, construção de prompts, biblioteca local, teste da API do PC e envio de pedidos para geração.
 
-Primeira base móvel: interface responsiva, criação local de prompts, biblioteca persistente no dispositivo e preparação do endereço do motor de geração. A geração de áudio ainda não está ligada a um modelo.
+## Motor no PC
+A API FastAPI está em `backend/`. Consulta `backend/README.md`. O aplicativo envia a chave de acesso no cabeçalho Bearer.
 
-## Executar no telemóvel
+## Termux
+O script `backend/start-termux.sh` prepara o Python, instala dependências, cria uma chave privada e inicia a API. Termux é o ambiente de desenvolvimento; não substitui o processo de compilação Android.
 
-Abrir a aplicação através de um servidor HTTP local ou alojar a pasta como site estático e instalar pelo navegador como aplicação. Para uso com Termux, instalar Node.js no Termux e executar:
+## APK
+O workflow em `.github/workflows/android.yml` compila um APK de depuração no GitHub Actions. O APK só fica disponível após uma execução bem-sucedida.
 
-```sh
-pkg update && pkg install nodejs
-npx serve .
-```
+## Estado
+A comunicação e o contrato da API estão preparados. A geração real de áudio ainda não está implementada: `POST /v1/generate` responde HTTP 503 até integrar um modelo.
 
-Abrir no navegador do telemóvel o endereço local indicado pelo servidor.
+## Arquitetura futura
+- Telemóvel: interface, prompts, biblioteca e controlo.
+- PC: API, inferência e processamento de áudio.
+- Modelo: integração futura com licença e dados adequados.
 
-## APK Android
-
-A embalagem APK será feita com Capacitor/Gradle num computador ou num ambiente CI. Termux é útil para executar ferramentas e testar o serviço local, mas não é o próprio APK.
-
-## Arquitetura planeada
-
-- Aplicação Android: interface, biblioteca local e gestão de tarefas.
-- Lógica no telemóvel: composição/validação de prompts e fila de pedidos.
-- Motor no PC: inferência de geração musical, com API local na rede.
-- Treino futuro: adaptar um modelo aberto com dados licenciados ou criados com autorização. O treino de um modelo musical completo não é realista num telemóvel; o telefone será o controlador e o PC fará o treino pesado.
-
-## Privacidade e direitos
-
-Usar apenas letras, gravações, vozes e conjuntos de dados próprios ou com autorização. Não clonar a voz de alguém sem consentimento.
-
-## Próximas etapas
-
-1. Confirmar esta base móvel em Android.
-2. Adicionar API do motor de áudio e reprodução/gestão de resultados.
-3. Preparar o projeto do PC e um ZIP com scripts de instalação e inferência.
-4. Avaliar fine-tuning de um modelo aberto, respeitando as licenças dos pesos e dos dados.
+Utiliza apenas gravações, letras, vozes e conjuntos de dados próprios ou autorizados. Nunca publiques a chave de acesso.
