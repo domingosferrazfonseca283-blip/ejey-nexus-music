@@ -3,7 +3,8 @@ set -euo pipefail
 
 REPO_URL="https://github.com/domingosferrazfonseca283-blip/ejey-nexus-music.git"
 WORKDIR="$HOME/ejey-nexus-music"
-ZIP_PATH="$HOME/storage/downloads/EJey-Nexus-PC-Training.zip"
+DOWNLOADS="$HOME/storage/downloads"
+ZIP_PATH="$DOWNLOADS/EJey-Nexus-PC-Training.zip"
 
 pkg update -y
 pkg install -y git zip
@@ -14,12 +15,16 @@ else
   git clone "$REPO_URL" "$WORKDIR"
 fi
 
-mkdir -p "$HOME/storage/downloads"
+mkdir -p "$DOWNLOADS"
 cd "$WORKDIR"
-zip -r "$ZIP_PATH" backend training README.md \
-  -x "backend/.env" "training/.venv/*" "training/data/raw/*" \
-     "training/data/processed/*" "training/runs/*" "training/*.pt" "training/*.pth"
+rm -f "$ZIP_PATH"
+zip -r "$ZIP_PATH" training README.md   -x "training/.venv/*" "training/**/__pycache__/*" "training/**/*.pyc" \
+     "training/data/raw/*" "training/data/processed/*" "training/runs/*" \
+     "training/*.pt" "training/*.pth" "training/.DS_Store"
 
+unzip -t "$ZIP_PATH" >/dev/null
 echo
-echo "ZIP criado em: $ZIP_PATH"
-echo "Copia este ficheiro para o PC. Os MIDI de treino devem ser adicionados no PC em training/data/raw/."
+echo "ZIP validado: $ZIP_PATH"
+echo "Tamanho:"
+du -h "$ZIP_PATH"
+echo "No PC, extrai o ZIP, instala training/requirements.txt e coloca MIDI licenciados em training/data/raw/."
