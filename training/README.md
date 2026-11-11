@@ -1,105 +1,82 @@
-# EJey Nexus Music — treino do primeiro modelo musical
+# EJey Nexus Music — AI model training
 
-## Objetivo
+## Current milestone: EJey Music Transformer v0.2
 
-Treinar e validar o **EJey Music Transformer v0.1**, o primeiro modelo próprio da plataforma. Ele aprende sequências simbólicas extraídas de MIDI e gera novas sequências exportáveis como MIDI.
+The first trainable component is a **conditional symbolic-music model**. It learns event sequences from MIDI and can generate new MIDI drafts conditioned on genre, mood and tempo labels represented in its training vocabulary.
 
-Esta é a primeira etapa do motor musical, não o sistema multimodal completo. Geração de áudio WAV/MP3, capas por IA, letras e síntese vocal serão módulos separados, integrados depois através da API.
+This is not yet a complete music-production AI. It does not directly generate WAV/MP3, lyrics, vocals, album artwork or mastered audio. Those require separate specialist models/services and an orchestration layer. The app's album-cover canvas remains a local procedural graphics tool until an image model is integrated.
 
-## Requisitos
+## Training environment
 
-- PC Windows, Linux ou macOS
-- Python 3.10+
-- 8 GB de RAM recomendados para experiências pequenas
-- GPU NVIDIA opcional; CPU funciona, mas é mais lenta
-
-## 1. Ambiente
+Use a Windows, Linux or macOS PC. Python 3.10+ is recommended; 8 GB RAM is a practical starting point. A compatible NVIDIA GPU can accelerate training, but CPU mode is supported for small experiments.
 
 ```bash
 python -m venv .venv
 ```
 
-Windows PowerShell:
+Windows PowerShell: `.venv\\Scripts\\Activate.ps1`
 
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-Linux/macOS:
-
-```bash
-source .venv/bin/activate
-```
-
-Instala as dependências:
+Linux/macOS: `source .venv/bin/activate`
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Para GPU NVIDIA, instala a versão de PyTorch compatível com o CUDA do computador, seguindo o seletor oficial do PyTorch. Depois instala as restantes dependências sem substituir essa versão.
+For NVIDIA GPU support, install the PyTorch build matching the computer's CUDA environment using the official PyTorch selector, then install the remaining requirements.
 
-## 2. Dados de treino
+## Dataset and rights
 
-Coloca ficheiros MIDI que tens direito a utilizar em `data/raw/`. O conversor percorre subpastas e aceita `.mid` e `.midi`.
+Put MIDI files in `data/raw/`. Use only music you created, public-domain material, or datasets whose licenses explicitly permit machine-learning training. Keep a record of each source and its license. Do not upload private material or copyrighted recordings/MIDI without permission.
 
-Usa composições próprias, domínio público ou conjuntos cuja licença permita explicitamente treino de modelos. Regista a origem, licença e condições de uso de cada conjunto. Não uses material protegido sem autorização.
+## 1. Prepare labelled MIDI sequences
 
-## 3. Converter MIDI
-
-```bash
-python prepare_dataset.py --input data/raw --output data/processed/sequences.jsonl
-```
-
-O conversor representa notas com eventos de espera, altura, intensidade e duração. Nesta versão, as pistas MIDI são combinadas numa sequência e a saída inicial usa um instrumento.
-
-## 4. Treinar
+The metadata flags apply to every MIDI file in the input folder. For a mixed dataset, prepare separate labelled subsets and combine their JSONL output files afterward.
 
 ```bash
-python train.py --data data/processed/sequences.jsonl --out runs/ejey-music-v1 --epochs 30
+python prepare_dataset.py --input data/raw --output data/processed/sequences.jsonl --genre "Jazz" --mood "Reflective" --tempo "Slow" --license-label "public-domain"
 ```
 
-Parâmetros ajustáveis:
+Allowed labels are free text, but generation must use labels represented in the training vocabulary. Use consistent spelling and capitalization.
 
-- `--batch-size 8`: reduz consumo de memória.
-- `--block-size 128`: contexto de eventos.
-- `--epochs 30`: número de épocas.
-- `--validation-ratio 0.1`: fração reservada para validação.
-- `--width 192 --layers 4 --heads 4`: dimensão inicial da rede.
-
-Começa com uma experiência pequena. Aumenta o modelo apenas depois de verificar memória, tempo e métricas.
-
-## 5. Gerar uma amostra MIDI
+## 2. Train
 
 ```bash
-python generate.py --checkpoint runs/ejey-music-v1/best.pt --vocab runs/ejey-music-v1/vocab.json --output runs/generated/ejey-sample.mid --max-tokens 256
+python train.py --data data/processed/sequences.jsonl --out runs/ejey-music-v0.2 --epochs 30
 ```
 
-Opções:
+Useful options:
 
-- `--temperature 0.9`: controla a diversidade.
-- `--top-k 20`: limita a amostragem aos tokens mais prováveis; 0 desativa o limite.
-- `--program 0`: instrumento General MIDI; 0 é piano.
-- `--seed 1234`: semente reproduzível.
+- `--batch-size 8` to reduce memory use.
+- `--block-size 128` for context length.
+- `--width 192 --layers 4 --heads 4` for the starter network.
+- `--validation-ratio 0.1` to reserve independent MIDI sequences for validation.
 
-O programa cria também um JSON com os eventos gerados. Abre o MIDI num DAW ou editor MIDI para avaliação.
+Start with a small experiment and inspect training and validation loss. A lower loss does not by itself mean better music. Keep validation files separate by composition/source where possible to reduce leakage.
 
-## 6. Artefactos e avaliação
+## 3. Generate a MIDI draft
 
-A pasta de saída contém `best.pt`, `latest.pt`, `vocab.json` e `training_report.json`.
+Use genre, mood and tempo labels that exist in the training vocabulary:
 
-Avalia perda de treino e validação, diversidade entre amostras, coerência rítmica, distribuição de alturas, duração e qualidade ao ouvir os MIDI. Uma perda baixa não garante música de qualidade.
+```bash
+python generate.py --checkpoint runs/ejey-music-v0.2/best.pt --vocab runs/ejey-music-v0.2/vocab.json --output runs/generated/ejey-draft.mid --genre "Jazz" --mood "Reflective" --tempo "Slow" --max-tokens 256
+```
 
-## 7. Limites desta versão
+Optional controls: `--temperature 0.9`, `--top-k 20`, `--program 0`, `--seed 1234`.
 
-- Aprende eventos MIDI simbólicos, não áudio bruto.
-- Não produz WAV/MP3 nem está ligado ao endpoint de geração da aplicação.
-- Não cria capas, letras ou vozes.
-- A representação simplifica tempo, instrumentos e polifonia.
-- A qualidade depende da quantidade, diversidade e licenciamento dos dados.
-- Não publiques tokens, chaves, dados privados, MIDI de terceiros ou checkpoints no Git.
+Open the MIDI in a DAW to listen, edit and arrange it. MIDI is symbolic note data; it is not a rendered audio file.
 
-## Próxima evolução
+## Output and evaluation
 
-Depois de validar treino e geração, a próxima versão deverá introduzir condicionamento por género, andamento, ambiente e estrutura; depois, representação multifaixa com instrumentos e compassos. A geração de áudio será um componente distinto, sem confundir MIDI simbólico com som final.
+The training run writes `best.pt`, `latest.pt`, `vocab.json` and `training_report.json`. Evaluate held-out loss, valid note ranges, rhythmic variation, pitch distribution, repetition and musical quality by listening to multiple samples.
+
+## Model roadmap
+
+1. Conditional symbolic MIDI (current starter).
+2. Multi-track representation with instrument identity, tempo maps, bars and richer timing.
+3. Arrangement and composition controls, including song sections and instrumentation.
+4. Audio rendering / text-to-audio integration through a separate audio model.
+5. Separate modules for lyrics, synthetic vocals, mixing/mastering and AI album artwork.
+6. A secure orchestration API that connects specialist models to the EJey app.
+
+Do not treat the starter Transformer as a production music model. Its quality is limited by dataset size, representation, labels and compute. Train on a PC; the phone app is the client, not the training machine.
