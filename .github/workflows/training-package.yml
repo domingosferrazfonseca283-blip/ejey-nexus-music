@@ -1,0 +1,33 @@
+name: Build PC training ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "training/**"
+      - "README.md"
+      - ".github/workflows/training-package.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create portable training ZIP
+        run: |
+          zip -r EJey-Nexus-PC-Training.zip training README.md \
+            -x "training/.venv/*" "training/**/__pycache__/*" "training/**/*.pyc" \
+               "training/data/raw/*" "training/data/processed/*" "training/runs/*" \
+               "training/*.pt" "training/*.pth" "training/.DS_Store"
+          unzip -t EJey-Nexus-PC-Training.zip
+      - name: Upload training package
+        uses: actions/upload-artifact@v4
+        with:
+          name: EJey-Nexus-PC-Training
+          path: EJey-Nexus-PC-Training.zip
+          if-no-files-found: error
+          retention-days: 30
