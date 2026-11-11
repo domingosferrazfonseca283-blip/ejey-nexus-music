@@ -57,7 +57,7 @@ Parâmetros úteis:
 
 Começa com um conjunto pequeno para confirmar que o pipeline funciona antes de aumentar os dados ou o modelo.
 
-## 5. Artefactos produzidos
+## 5. Gerar uma primeira amostra MIDI\n\nDepois do treino:\n\n```bash\npython generate.py --checkpoint runs/ejey-music-v1/best.pt --vocab runs/ejey-music-v1/vocab.json --output runs/generated/ejey-sample.mid --max-tokens 256\n```\n\nO script amostra eventos do modelo e exporta um ficheiro MIDI e um JSON de eventos. A renderização usa um instrumento de piano padrão; esta é uma amostra técnica para validar a cadeia de geração, não uma produção musical final.\n\n## 6. Artefactos produzidos
 
 A pasta `runs/ejey-music-v1/` contém:
 
@@ -68,7 +68,7 @@ A pasta `runs/ejey-music-v1/` contém:
 
 Guarda os checkpoints fora do Git e faz cópias de segurança.
 
-## 6. Como avaliar
+## 7. Como avaliar
 
 A perda (*loss*) mede a capacidade de prever eventos no conjunto reservado. Uma perda menor é útil, mas não garante música interessante. A próxima etapa deverá implementar geração controlada de eventos, conversão de eventos para MIDI, escuta crítica e avaliação de diversidade, coerência rítmica e estrutura musical.
 
