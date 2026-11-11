@@ -8,18 +8,30 @@ Interface responsiva, construção de prompts, biblioteca local, teste da API do
 ## Motor no PC
 A API FastAPI está em `backend/`. Consulta `backend/README.md`. O aplicativo envia a chave de acesso no cabeçalho Bearer.
 
-## Termux
-O script `backend/start-termux.sh` prepara o Python, instala dependências, cria uma chave privada e inicia a API. Termux é o ambiente de desenvolvimento; não substitui o processo de compilação Android.
+## Treino experimental no PC
+A pasta `training/` contém um pipeline inicial para converter ficheiros MIDI autorizados em sequências simbólicas e treinar um pequeno Transformer de previsão de eventos MIDI. Isto é um protótipo simbólico, não um gerador de áudio. Consulta `training/README.md`.
+
+## Preparar ZIP no Termux
+Executa no Termux:
+```bash
+termux-setup-storage
+pkg update -y
+pkg install -y git
+git clone https://github.com/domingosferrazfonseca283-blip/ejey-nexus-music.git
+cd ejey-nexus-music
+bash package-termux.sh
+```
+O ficheiro `EJey-Nexus-PC-Training.zip` será criado em `~/storage/downloads/`. O ZIP inclui API e treino, mas exclui chaves, datasets e checkpoints. Adiciona no PC apenas MIDI próprios, de domínio público ou com licença que permita treino.
 
 ## APK
-O workflow em `.github/workflows/android.yml` compila um APK de depuração no GitHub Actions. O APK só fica disponível após uma execução bem-sucedida.
+O workflow em `.github/workflows/android.yml` compila um APK de depuração no GitHub Actions. O APK está disponível como artefacto após uma execução bem-sucedida.
 
-## Estado
-A comunicação e o contrato da API estão preparados. A geração real de áudio ainda não está implementada: `POST /v1/generate` responde HTTP 503 até integrar um modelo.
+## Estado e limitações
+A comunicação e o contrato da API estão preparados. A geração real de áudio ainda não está implementada: `POST /v1/generate` responde HTTP 503 até integrar um modelo de áudio. O modelo de treino incluído aprende sequências MIDI simbólicas e ainda não é carregado pela API.
 
-## Arquitetura futura
+## Arquitetura
 - Telemóvel: interface, prompts, biblioteca e controlo.
-- PC: API, inferência e processamento de áudio.
+- PC: API, treino experimental, inferência e futuro processamento de áudio.
 - Modelo: integração futura com licença e dados adequados.
 
-Utiliza apenas gravações, letras, vozes e conjuntos de dados próprios ou autorizados. Nunca publiques a chave de acesso.
+Nunca publiques a chave de acesso. Usa apenas gravações, letras, vozes e conjuntos de dados próprios ou autorizados.
