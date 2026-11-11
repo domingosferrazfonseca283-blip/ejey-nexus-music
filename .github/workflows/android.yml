@@ -11,6 +11,8 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - "build.mjs"
+      - "README.md"
+      - "backend/**"
       - ".github/workflows/android.yml"
 jobs:
   build:
