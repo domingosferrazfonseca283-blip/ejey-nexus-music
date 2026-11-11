@@ -60,7 +60,12 @@ def main():
     with torch.no_grad():
         for _ in range(args.max_tokens):
             x = torch.tensor([ids[-config["block_size"]:]], dtype=torch.long, device=device)
-            next_id = sample_next(model(x)[0, -1].clone(), args.temperature, args.top_k)
+            logits = model(x)[0, -1].clone()
+            allowed = [i for i, token in enumerate(vocabulary) if token == "<EOS>" or token.startswith(("WAIT:", "NOTE:"))]
+            blocked = torch.ones_like(logits, dtype=torch.bool)
+            blocked[allowed] = False
+            logits[blocked] = float("-inf")
+            next_id = sample_next(logits, args.temperature, args.top_k)
             token = vocabulary[next_id]
             if token == "<EOS>":
                 break
