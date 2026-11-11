@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b14"><meta name="description" content="EJey Nexus Music — estúdio de criação musical com IA">
+<link rel="manifest" href="manifest.webmanifest"><title>EJey Nexus Music</title>
+<style>
+:root{color-scheme:dark;--bg:#090b14;--panel:#131827;--line:#263149;--text:#f4f6ff;--muted:#9ba8c2;--violet:#9a7cff;--cyan:#5ce1e6}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#26204c 0,transparent 50%),var(--bg);color:var(--text);font:15px system-ui,sans-serif;min-height:100vh}header{padding:22px 18px 12px;max-width:760px;margin:auto}header small{color:var(--cyan);letter-spacing:.18em;font-weight:700}h1{font-size:28px;margin:7px 0}p{color:var(--muted);line-height:1.5}.wrap{max-width:760px;margin:auto;padding:12px 16px 40px}.panel{background:linear-gradient(145deg,#171e30,#101522);border:1px solid var(--line);border-radius:20px;padding:18px;margin:12px 0;box-shadow:0 12px 35px #0004}.eyebrow{font-size:12px;color:var(--cyan);font-weight:700;letter-spacing:.12em;text-transform:uppercase}label{display:block;margin:14px 0 7px;color:#d5dcf0;font-weight:600}input,textarea,select{width:100%;border:1px solid #34415e;border-radius:12px;padding:13px;background:#0b1020;color:var(--text);font:inherit}textarea{min-height:105px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:13px;padding:14px 16px;font:700 15px system-ui;cursor:pointer;background:linear-gradient(100deg,var(--violet),#6c8cff);color:white;width:100%;margin-top:14px}.btn.secondary{background:#242e46;border:1px solid #394765}.btn:disabled{opacity:.5}.status{padding:12px;border-radius:12px;background:#0b1020;color:var(--muted);margin-top:12px;white-space:pre-wrap}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chip{background:#252b46;border:1px solid #414b70;padding:8px 11px;border-radius:30px;color:#dce3ff;font-size:13px}.track{padding:12px;border:1px solid var(--line);border-radius:12px;margin-top:9px}.track strong{display:block}.track span{color:var(--muted);font-size:13px}.foot{text-align:center;color:#71809d;font-size:12px;padding:22px}
+</style></head>
+<body>
+<header><small>EJEY NEXUS / AI MUSIC</small><h1>O teu estúdio. A tua próxima música.</h1><p>Transforma uma ideia num conceito musical. Cria, organiza e prepara as tuas faixas no telemóvel.</p></header>
+<main class="wrap">
+<section class="panel"><div class="eyebrow">01 · Criar música</div>
+<label for="idea">Descreve a música que queres</label><textarea id="idea" placeholder="Ex.: uma faixa afrobeat animada, com guitarra suave, percussão e refrão memorável..."></textarea>
+<div class="grid"><div><label for="genre">Estilo</label><select id="genre"><option>Afrobeat</option><option>Amapiano</option><option>Hip-hop</option><option>R&B</option><option>Pop</option><option>Gospel</option><option>Eletrónica</option><option>Instrumental</option><option>Outro</option></select></div><div><label for="mood">Ambiente</label><select id="mood"><option>Energético</option><option>Calmo</option><option>Emocional</option><option>Inspirador</option><option>Sombrio</option><option>Festivo</option></select></div></div>
+<div class="grid"><div><label for="tempo">Ritmo</label><select id="tempo"><option>Moderado</option><option>Lento</option><option>Rápido</option></select></div><div><label for="vocals">Voz</label><select id="vocals"><option>Com voz</option><option>Instrumental</option><option>Voz e coro</option></select></div></div>
+<button class="btn" id="compose">Construir prompt musical</button><div class="status" id="result" aria-live="polite">A lógica local está pronta. A geração de áudio será ligada ao motor de IA na próxima fase.</div>
+<button class="btn secondary" id="save">Guardar ideia no estúdio</button></section>
+<section class="panel"><div class="eyebrow">02 · Biblioteca local</div><p>As tuas ideias ficam guardadas neste dispositivo.</p><div id="library"><p>A biblioteca está vazia.</p></div></section>
+<section class="panel"><div class="eyebrow">03 · Motor de IA</div><p id="engine">Modo de preparação: interface e construção de prompts funcionam localmente. A geração de áudio requer um motor compatível ligado ao telemóvel ou ao PC.</p><label for="endpoint">Endereço do motor (opcional)</label><input id="endpoint" type="url" placeholder="http://192.168.1.10:8000"><button class="btn secondary" id="connect">Guardar endereço do motor</button><div class="status" id="connection">Motor ainda não configurado.</div></section>
+<div class="foot">EJey Nexus Music · Protótipo móvel · As ideias são guardadas localmente.</div>
+</main>
+<script src="app.js"></script>
+</body></html>
