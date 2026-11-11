@@ -1,0 +1,10 @@
+{
+  "name": "EJey Nexus Music",
+  "short_name": "EJey Music",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090b14",
+  "theme_color": "#090b14",
+  "description": "Estúdio móvel de criação musical com IA",
+  "icons": []
+}
