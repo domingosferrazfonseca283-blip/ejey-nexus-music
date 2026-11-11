@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert licensed MIDI files into note-event sequences for EJey experiments."""
+"""Convert MIDI files into licensed, condition-labelled EJey symbolic sequences."""
 import argparse
 import json
 from pathlib import Path
@@ -8,7 +8,6 @@ import pretty_midi
 
 
 def quantize_duration(seconds: float) -> int:
-    # 100 ms bins, clipped to a useful symbolic range.
     return max(1, min(80, int(round(seconds * 10))))
 
 
@@ -35,15 +34,20 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=Path("data/raw"))
     parser.add_argument("--output", type=Path, default=Path("data/processed/sequences.jsonl"))
+    parser.add_argument("--genre", default="Other")
+    parser.add_argument("--mood", default="Neutral")
+    parser.add_argument("--tempo", default="Moderate")
+    parser.add_argument("--license-label", default="user-confirmed")
     args = parser.parse_args()
     if not args.input.exists():
-        raise SystemExit(f"Pasta de entrada não encontrada: {args.input}")
+        raise SystemExit(f"Input directory not found: {args.input}")
+    if not args.license_label.strip():
+        raise SystemExit("A non-empty license label is required.")
     files = sorted(p for p in args.input.rglob("*") if p.suffix.lower() in {".mid", ".midi"})
     if not files:
-        raise SystemExit(f"Nenhum ficheiro MIDI encontrado em {args.input}")
+        raise SystemExit(f"No MIDI files found in {args.input}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    written = 0
-    skipped = 0
+    written = skipped = 0
     with args.output.open("w", encoding="utf-8") as target:
         for midi_path in files:
             try:
@@ -51,13 +55,22 @@ def main() -> None:
                 if len(events) < 4:
                     skipped += 1
                     continue
-                target.write(json.dumps({"source": midi_path.name, "events": events}, ensure_ascii=False) + "\n")
+                row = {
+                    "source": midi_path.name,
+                    "license_label": args.license_label.strip(),
+                    "genre": args.genre.strip()[:60],
+                    "mood": args.mood.strip()[:60],
+                    "tempo": args.tempo.strip()[:40],
+                    "events": events,
+                }
+                target.write(json.dumps(row, ensure_ascii=False) + "\n")
                 written += 1
             except Exception as exc:
                 skipped += 1
-                print(f"IGNORADO {midi_path}: {exc}")
-    print(f"MIDI encontrados: {len(files)} | sequências guardadas: {written} | ignorados: {skipped}")
+                print(f"SKIPPED {midi_path}: {exc}")
+    print(f"MIDI found: {len(files)} | sequences saved: {written} | skipped: {skipped}")
     print(f"Dataset: {args.output}")
+    print("Use only files you created, public-domain files, or files whose license explicitly permits model training.")
 
 
 if __name__ == "__main__":
