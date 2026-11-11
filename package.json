@@ -4,7 +4,8 @@
   "private": true,
   "description": "Mobile music creation studio",
   "scripts": {
-    "start": "npx serve .",
+    "start": "npx serve www",
+    "build:web": "node build.mjs",
     "android:init": "npx cap add android",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android"
