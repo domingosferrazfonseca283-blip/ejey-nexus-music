@@ -1,6 +1,6 @@
 {
   "appId": "com.ejey.nexusmusic",
   "appName": "EJey Nexus Music",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false
 }
